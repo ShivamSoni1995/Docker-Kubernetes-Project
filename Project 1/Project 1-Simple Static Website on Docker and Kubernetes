@@ -1,0 +1,130 @@
+Okay, let's break down Project 1: Hosting a Simple Static Website with Docker and Kubernetes.
+
+Here's a step-by-step guide:
+
+ Part 1: Dockerizing the Static Website 
+
+1.   Create the Website File: 
+      Make a new folder for your project, let's call it  "static-website ".
+      Inside this folder, create a file named  "index.html " with some simple content:
+
+
+2.   Create the Dockerfile: 
+      In the  same   "static-website " folder, create a file named exactly  "Dockerfile " (no extension) with the following content:
+
+     dockerfile
+    # Use an official Nginx image as the base image
+    FROM nginx:alpine
+
+    # Copy the static HTML file from your project folder into the Nginx web server directory inside the container
+    COPY index.html /usr/share/nginx/html/index.html
+
+    # (Optional) Expose port 80 (Nginx default port) - mainly for documentation
+    EXPOSE 80
+     
+       Explanation: 
+           "FROM nginx:alpine ": Starts with a lightweight Nginx web server image.
+           "COPY index.html /usr/share/nginx/html/index.html ": Copies your local  "index.html " into the default directory Nginx uses to serve files within the container.
+
+3.   Build the Docker Image: 
+      Open your terminal or command prompt.
+      Navigate  into  the  "static-website " folder ( "cd static-website ").
+      Run the build command:
+
+         bash
+        docker build -t my-static-website:v1 .
+         
+       Explanation: 
+           "docker build ": The command to build an image.
+           "-t my-static-website:v1 ": Tags the image with a name ( "my-static-website ") and a version ( "v1 "). You can choose any name/tag.
+           ". ": Tells Docker to look for the  "Dockerfile " in the current directory.
+
+4.   Run the Docker Container Locally: 
+      Run the container using the image you just built:
+
+         bash
+        docker run -d -p 8080:80 --name web-server my-static-website:v1
+         
+       Explanation: 
+           "docker run ": The command to run a container.
+           "-d ": Runs the container in detached mode (in the background).
+           "-p 8080:80 ": Maps port  "8080 " on your host machine to port  "80 " inside the container (where Nginx is listening).
+           "--name web-server ": Gives the running container a convenient name.
+           "my-static-website:v1 ": The name and tag of the image to use.
+       Verify:  Open your web browser and go to  "http://localhost:8080 ". You should see your simple website!
+       Stop/Remove (when done):   "docker stop web-server " and then  "docker rm web-server ".
+
+ Part 2: Deploying to Kubernetes 
+
+ (Assumption: You have a local Kubernetes cluster running - Minikube, Kind, k3s, or Docker Desktop Kubernetes enabled). 
+
+1.   Create the Deployment Manifest: 
+      In your  "static-website " folder, create a file named  "deployment.yaml ":
+
+    
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: static-website-deployment # Name of the Deployment object
+    spec:
+      replicas: 2 # Tell Kubernetes to run 2 identical copies (Pods)
+      selector:
+        matchLabels:
+          app: static-website # Pods with this label are managed by this Deployment
+      template:
+        metadata:
+          labels:
+            app: static-website # Label applied to the Pods
+        spec:
+          containers:
+          - name: website-container # Name of the container within the Pod
+            image: my-static-website:v1 # The Docker image to use
+            ports:
+            - containerPort: 80 # The port the container listens on
+            imagePullPolicy: Never # Important for local images not pushed to a registry. Remove or set to 'IfNotPresent' if using Docker Hub etc.
+     
+
+2.   Create the Service Manifest: 
+      In the same folder, create a file named  "service.yaml ":
+
+     yaml
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: static-website-service # Name of the Service object
+    spec:
+      type: NodePort # Exposes the service on each Node's IP at a static port
+      selector:
+        app: static-website # Selects Pods with this label to send traffic to
+      ports:
+      - protocol: TCP
+        port: 80       # Port inside the cluster for this service
+        targetPort: 80 # Port on the Pods (containerPort) to forward traffic to
+        # NodePort: (Optional) Specify a port between 30000-32767, otherwise K8s assigns one
+     
+       Explanation: 
+           "type: NodePort ": Makes the service accessible via a port on your cluster's node(s). Good for local testing. (LoadBalancer is often used in cloud environments).
+           "selector ": Connects the Service to the Pods created by the Deployment using the  "app: static-website " label.
+
+3.   Apply the Manifests: 
+      In your terminal (still in the  "static-website " folder), apply both files:
+
+         bash
+        kubectl apply -f deployment.yaml
+        kubectl apply -f service.yaml
+         
+      Or apply everything in the current directory:  "kubectl apply -f . "
+
+4.   Check the Status: 
+      Wait a minute for things to start up, then check:
+
+         bash
+        kubectl get deployments # Should show static-website-deployment with 2/2 READY
+        kubectl get pods        # Should show 2 pods starting with 'static-website-deployment-' with STATUS Running
+        kubectl get services    # Should show static-website-service with a TYPE NodePort and a PORT like 80:XXXXX/TCP
+         
+
+5.   Access the Website: 
+       If using Minikube:  Run  "minikube service static-website-service ". This will often open the URL in your browser.
+       If using Docker Desktop or others:  Find the NodePort assigned by running  "kubectl get service static-website-service ". Look for the port mapping (e.g.,  "80:31234/TCP "). You can then usually access it via  "http://localhost:31234 " (replace  "31234 " with the actual port number assigned).
+

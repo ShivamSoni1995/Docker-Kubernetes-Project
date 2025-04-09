@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: static-website-service # Name of the Service object
+spec:
+  type: NodePort # Exposes the service on each Node's IP at a static port
+  selector:
+    app: static-website # Selects Pods with this label to send traffic to
+  ports:
+  - protocol: TCP
+    port: 80       # Port inside the cluster for this service
+    targetPort: 80 # Port on the Pods (containerPort) to forward traffic to
+    # NodePort: (Optional) Specify a port between 30000-32767, otherwise K8s assigns one

@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: static-website-deployment # Name of the Deployment object
+spec:
+  replicas: 2 # Tell Kubernetes to run 2 identical copies (Pods)
+  selector:
+    matchLabels:
+      app: static-website # Pods with this label are managed by this Deployment
+  template:
+    metadata:
+      labels:
+        app: static-website # Label applied to the Pods
+    spec:
+      containers:
+      - name: website-container # Name of the container within the Pod
+        image: my-static-website:v1 # The Docker image to use
+        ports:
+        - containerPort: 80 # The port the container listens on
+        imagePullPolicy: Never # Important for local images not pushed to a registry. Remove or set to 'IfNotPresent' if using Docker Hub etc.
