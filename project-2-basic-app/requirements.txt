@@ -1,0 +1,4 @@
+# requirements.txt
+Flask==2.3.3
+# Use a specific version for reproducibility
+# Check PyPI for the latest stable Flask version if needed

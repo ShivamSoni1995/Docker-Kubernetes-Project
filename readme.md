@@ -146,9 +146,8 @@ Containerizing a simple dynamic web application (e.g., built with Python/Flask o
 
 ### Technologies 
 
-* * Python (Flask/Django)
-    * Node.js (Express)
-    * * Docker
+* Python (Flask/Django) or Node.js (Express)
+* Docker
 * Kubernetes
 
 ### Running with Docker 
@@ -214,12 +213,11 @@ Deploying a more complex application consisting of a web frontend/API interactin
 
 ### Technologies 
 
-* * Python (Flask/Django)
-    * Node.js (Express)
-    * * * PostgreSQL
-    * MongoDB
-    * Redis
-    * * Docker & Docker Compose
+* Python (Flask/Django) or Node.js (Express)
+* PostgreSQL
+* MongoDB
+* Redis
+* Docker & Docker Compose
 * Kubernetes (Deployments/StatefulSets, Services, ConfigMaps/Secrets, PersistentVolumeClaims)
 
 ### Running with Docker Compose 
