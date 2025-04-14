@@ -34,7 +34,7 @@ Before you begin, ensure you have the following tools installed and configured:
 * **Docker Desktop:** Includes Docker Engine, Docker CLI, and optionally Kubernetes (enable it in settings). Or, separate Docker Engine + CLI and a local K8s cluster like Minikube, Kind, or k3s.
 * **kubectl:** The Kubernetes command-line tool.
 * * **Node.js & npm** (if using Node.js)
-    * **Python & pip** (if using Python)
+* **Python & pip** (if using Python)
 
 ## Repository Structure
 
